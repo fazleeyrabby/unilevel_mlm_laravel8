@@ -22,3 +22,7 @@ Auth::routes();
 Route::get('info', function() { phpinfo(); });
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'dashboard'])->name('dashboard');
+
+Route::get('/blank', [App\Http\Controllers\HomeController::class, 'blank'])->name('blank');

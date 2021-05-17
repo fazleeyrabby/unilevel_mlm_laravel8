@@ -1,0 +1,96 @@
+/* ==============
+  Widgets
+===================*/
+
+.widget-chart li {
+  width: 31.5%;
+  display: inline-block;
+  padding: 0;
+
+  i {
+    font-size: 22px;
+  }
+}
+
+// mini-stats
+
+.mini-stat{
+  overflow: hidden;
+  .mini-stat-icon{
+    i{
+      font-size: 34px;
+    }
+  }
+}
+
+// activity list
+
+.activity-list {
+  padding-left: 86px;
+  .activity-item {
+    position: relative;
+    padding-bottom: 26px;
+    padding-left: 45px;
+    border-left: 2px solid $light3;
+    &:after {
+      content: "";
+      display: block;
+      position: absolute;
+      top: 3px;
+      left: -7px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: $white;
+      border: 2px solid $primary;
+    }
+    .activity-item-img{
+      img{
+        max-width: 78px;
+      }
+    }
+    .activity-date{
+      position: absolute;
+      left: -82px;
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .activity-list{
+    padding-left: 0px;
+    .activity-date{
+      position: relative !important;
+      display: block;
+      left: 0px !important;
+      margin-bottom: 10px;
+    }
+  }
+}
+
+// sale widget
+
+.bg-sale-wid{
+  background-image: url("../images/bg-sale-wid.png");
+  background-size: cover;
+  background-position: center;
+}
+
+// weather widget
+
+.weather-box{
+  overflow: hidden;
+  .weather-icon{
+    i{
+      color: rgba($white, 0.1);
+      position: absolute;
+      bottom: -65px;
+      right: -34px;
+      font-size: 10rem;
+    }
+  }
+}
+
+.post-details{
+  overflow: hidden;
+}

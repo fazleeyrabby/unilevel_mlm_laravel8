@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Auth;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+
 
 class HomeController extends Controller
 {
@@ -21,8 +25,30 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
+    
     public function index()
     {
         return view('home');
+    }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+
+    public function dashboard()
+    {
+        return view('dashboard.dashboard');
+    }
+
+    /**
+     * Show blank page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function blank()
+    {
+        return view('dashboard.blank');
     }
 }
