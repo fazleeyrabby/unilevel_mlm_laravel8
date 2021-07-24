@@ -126,7 +126,7 @@ class UserController extends Controller
 
         $id = base64_decode($id)/ Auth::user()->id;
         $user = User::findOrFail($id);
-        $user->password = $request->password;
+        $user->password = Hash::make($request->password);
         if($user->save()){
             return redirect('admin/users')->with(['status' => 'success', 'message' => 'Profile update success!']);
         }
@@ -146,7 +146,7 @@ class UserController extends Controller
 
         $id = base64_decode($id)/ Auth::user()->id;
         $user = User::findOrFail($id);
-        $user->transaction_password = $request->transaction_password;
+        $user->transaction_password = Hash::make($request->transaction_password);
         if($user->save()){
             return redirect('admin/users')->with(['status' => 'success', 'message' => 'Transaction password update success!']);
         }

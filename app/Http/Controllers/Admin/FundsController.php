@@ -27,7 +27,6 @@ class FundsController extends Controller
             'transaction_password' => 'min:6|required',
             'confirm_transaction_password' => 'same:transaction_password|required',
         ]);
-            
         if(Hash::make($request->transaction_password) !== Auth::user()->transaction_password){
             return redirect('admin/funds/transfer-report')->with(['status' => 'error', 'message' => 'Transaction password does not matches!']);
         }
