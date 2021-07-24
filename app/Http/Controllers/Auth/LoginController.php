@@ -10,8 +10,8 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
-
+use DB;
+use App\Models\User;
 class LoginController extends Controller
 {
     /*
@@ -32,7 +32,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = RouteServiceProvider::HOME;
+    protected $redirectTo = 'dashboard';
 
     /**
      * Create a new controller instance.
@@ -47,6 +47,55 @@ class LoginController extends Controller
 
     protected $maxAttempts = 3;
     protected $decayMinutes = 1;
+
+    public function login(Request $request){
+
+        $request->validate([
+            'email' => 'required|string|min:3',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $login = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $credentials = $request->only($login, 'password');
+
+        if (Auth::attempt($credentials)) {
+            $downline_updated = strtotime(date(Auth::user()->downline_updated));
+            $today = strtotime(date('Y-m-d'));
+            
+            // if($downline_updated || (($today - $downline_updated) / 86400 ) > 7){
+               
+                $downline = $this->countDownline(0, Auth::user()->id);
+         
+                DB::table('users')
+                ->where('id', Auth::user()->id)
+                ->update(['downline' => $downline, 'downline_updated' => date('Y-m-d')]);
+            // }
+
+            if(Auth::user()->role === 'admin'){
+                return redirect()->intended('admin');
+            }
+            if(Auth::user()->role === ('dealer' || 'sub-dealer')){
+                return redirect()->intended('dealer');
+            }
+            return redirect()->intended('/member');
+        }
+
+        
+
+        return redirect('login')->with('error', 'Opes! You have entered invalid credentials');
+    }
+
+    public function countDownline($total, $parent_id){
+        $tree = User::where(['parent_id' => $parent_id])->get();
+        if(count($tree)> 0){
+            $total += count($tree);
+            for($i = 0; $i< $total; $i++){
+                return $this->countDownline($total, $tree[$i]->id);
+            }
+        }
+        return $total;
+    }
 
     public function findUsername()
     {
@@ -63,6 +112,5 @@ class LoginController extends Controller
     {
         return $this->username;
     }
-
     
 }

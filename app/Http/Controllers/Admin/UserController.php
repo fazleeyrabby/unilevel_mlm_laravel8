@@ -11,6 +11,11 @@ use App\Rules\CheckPackage;
 use App\Rules\CheckDealer;
 use App\Models\User;
 use App\Models\Package;
+use App\Models\Bonus;
+use App\Models\Carrylog;
+use Hash;
+use Auth;
+use DB;
 
 class UserController extends Controller
 {
@@ -19,8 +24,11 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+
     public function index()
     {
+        
         $users = User::all();
         return view('admin.users', compact('users'));
     }
@@ -33,14 +41,44 @@ class UserController extends Controller
     public function profile($id)
     {   
         
-        $id = base64_decode($id);
+        $id = base64_decode($id)/ Auth::user()->id;
         $user = User::findOrFail($id);
         $parent = User::find($user->parent_id);
         $sponsor = User::find($user->sponsor_id);
+        $carry = Carrylog::where('user_id',7)->where('paid',null)->sum('carry');
         $dealer  = $this->getUserBy(['dealer_code' => $user->dealer_code]);
-        return view('admin.users.profile', compact('user','parent','sponsor','dealer'));
+
+        return view('admin.users.profile', compact('user','parent','sponsor','dealer','carry'));
     }
 
+
+    /**
+     * Display user referral.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function referral($id)
+    {   
+        
+        $id = base64_decode($id)/ Auth::user()->id;
+        $user = User::findOrFail($id);
+        $users = User::where(['sponsor_id' => $id])->get();
+        return view('admin.users.referral', compact('user','users'));
+    }
+
+     /**
+     * Display user bonus.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function bonus($id)
+    {   
+        
+        $id = base64_decode($id)/ Auth::user()->id;
+        $user = User::findOrFail($id);
+        $bonus = Bonus::with('user')->where(['user_id' => $id])->get();
+        return view('admin.users.bonus', compact('user','bonus'));
+    }
 
     public function contact_update(Request $request, $id)
     {
@@ -52,10 +90,10 @@ class UserController extends Controller
             'district' => 'required',
             'zip_code' => 'required',
             'address' => 'required',
-            
+            'profile_picture' => 'image'
         ]);
 
-        $id = base64_decode($id);
+        $id = base64_decode($id)/ Auth::user()->id;
         $user = User::findOrFail($id);
         $user->name = $request->name;
         $user->email = $request->email;
@@ -65,8 +103,12 @@ class UserController extends Controller
         $user->zip_code = $request->zip_code;
         $user->address = $request->address;
         $user->national_id = $request->national_id;
+        
+        if($request->file('profile_picture'))
+            $request->file('profile_picture')->move(public_path('assets/images/users/'), $id.'.jpg');
+            
         if($user->save()){
-            return redirect('admin/users')->with(['status' => 'success', 'message' => 'Profile update success!']);
+            return redirect('admin/users')->with(['status' => 'success', 'message' => 'Contact info update success!']);
         }
         else{
             return redirect('admin/users')->with(['status' => 'error', 'message' => 'Something went wrong!']);
@@ -82,7 +124,7 @@ class UserController extends Controller
             'password_confirmation' => 'same:password|required',
         ]);
 
-        $id = base64_decode($id);
+        $id = base64_decode($id)/ Auth::user()->id;
         $user = User::findOrFail($id);
         $user->password = $request->password;
         if($user->save()){
@@ -93,6 +135,8 @@ class UserController extends Controller
         }
     }
 
+
+
     public function trans_pass_update(Request $request, $id)
     {
         $request->validate([
@@ -100,17 +144,54 @@ class UserController extends Controller
             'transaction_password_confirmation' => 'required|same:transaction_password',
         ]);
 
-        $id = base64_decode($id);
+        $id = base64_decode($id)/ Auth::user()->id;
         $user = User::findOrFail($id);
         $user->transaction_password = $request->transaction_password;
         if($user->save()){
-            return redirect('admin/users')->with(['status' => 'success', 'message' => 'Profile update success!']);
+            return redirect('admin/users')->with(['status' => 'success', 'message' => 'Transaction password update success!']);
         }
         else{
             return redirect('admin/users')->with(['status' => 'error', 'message' => 'Something went wrong!']);
         }
     }
     
+
+    public function update_role(Request $request, $id)
+    {
+        $request->validate([
+            'role' => 'required',
+        ]);
+
+        $dealer_id =  rand(10000,99999);
+        $dealer= $this->generateDealerId($dealer_id);
+        
+        while($dealer){
+            $dealer_id =  rand(10000,99999);
+            $dealer = $this->generateDealerId($dealer_id);
+        }
+
+        $id = base64_decode($id)/ Auth::user()->id;
+        $user = User::findOrFail($id);
+
+        if($request->role == 1){
+            $user->role = 'dealer';
+            if($user->dealer_id == null){
+                $user->dealer_id = $dealer_id;
+            }
+        }else{
+            $user->role = 'member';
+        }
+
+        if($user->save()){
+            return redirect('admin/users')->with(['status' => 'success', 'message' => 'Role update success!']);
+        }
+        else{
+            return redirect('admin/users')->with(['status' => 'error', 'message' => 'Something went wrong!']);
+        }
+
+        return $request;
+    }
+
     /**
      * Show the form for new user registration.
      *
@@ -129,13 +210,15 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
     public function store(Request $request)
     {
         $request->validate([
-            'username' => ['required', 'unique:users','min:8'],
+            'username' => ['required', 'unique:users','min:4'],
             'sponsor' => ['required', new CheckParent()],
             'package' => ['required', new CheckPackage()],
             'parent' => ['required', new CheckParent()],
+            'profile_picture' => 'image',
             'position' =>  [
                 'required', 
                 Rule::unique('users')
@@ -144,7 +227,7 @@ class UserController extends Controller
             ],
             'dealer_code' => ['required', new CheckDealer()],
             'name' => 'required|max:255',
-            'email' => 'required',
+            'email' => 'required','unique:users',
             'phone' => 'required',
             'thana' => 'required',
             'district' => 'required',
@@ -157,16 +240,18 @@ class UserController extends Controller
             'confirm_transaction_password' => 'same:transaction_password|required',
         ]);
 
-        
+        $sponsor = $this->getUserBy(['username' => $request->sponsor]);
+        $parent = $this->getUserBy(['username' => $request->parent]);
+        $dealer  = $this->getUserBy(['dealer_id' => $request->dealer_code]);
+
         $user = new User;
         $user->username = $request->username;
-        $user->sponsor_id = $this->getUserBy(['username' => $request->sponsor])->id;
+        $user->sponsor_id = $sponsor->id;
         $user->package_id = $request->package;
-        $user->parent_id = $this->getUserBy(['username' => $request->parent])->id;
+        $user->parent_id = $parent->id;
         $user->position = $request->position;
-        $user->dealer = $request->dealer_code;
+        $user->dealer_id = $user->id;
         
-
         $user->name = $request->name;
         $user->email = $request->email;
         $user->phone = $request->phone;
@@ -174,10 +259,165 @@ class UserController extends Controller
         $user->district = $request->district;
         $user->zip_code = $request->zip_code;
         $user->address = $request->address;
-        $user->password = $request->password;
-        $user->transaction_password = $request->transaction_password;
+        $user->password = Hash::make($request->password);
+        $user->transaction_password = Hash::make($request->transaction_password);
 
-        return $user->save();
+        $user->save();
+        $user_id = $user->id;
+        
+        if($request->file('profile_picture'))
+            $request->file('profile_picture')->move(public_path('assets/images/users/'), $user_id.'.jpg');
+            
+        $this->paySponsorBonus($request->package, $sponsor->id, $user_id, $sponsor->bonus);
+        $this->deductPackagePoint($request->package);
+        $this->payBonusByDealerCode($dealer->id, $user_id,$request->package);
+        $this->payGenerationBonus($parent->id, $parent->position, $user_id, $request->package);
+
+
+        User::where('id', $sponsor->id)->update(['total']);
+        return redirect('admin/users/'.base64_encode($user_id * Auth::user()->id).'/profile');
+    }
+
+    /**
+     * Pay 10% sponsor bonus.
+     *
+     * @param  int  $package_id
+     * @param  int  $sponsor_id
+     * @param  int  $reference_id // newly created user id
+     * 
+     */
+    
+    public function paySponsorBonus($package_id, $sponsor_id, $reference_id, $current_bonus){
+        
+        $package = Package::find($package_id);
+        $amount = ($package->point ) / 10 ;
+        $type = 'sponsor';
+
+        $bonus = new Bonus;
+        $bonus->user_id = $sponsor_id;
+        $bonus->user_balance = $current_bonus + $amount;
+        $bonus->amount = $amount;
+        $bonus->type = $type;
+        $bonus->model =  '';
+        $bonus->reference_id = $reference_id;
+
+        $bonus = $bonus->save();
+        DB::table('users')->where('id', $sponsor_id)->increment('bonus', $amount);
+       
+    }
+
+    /**
+     * Deduct package point from auth user to create new user.
+     *
+     * @param  int  $package_id
+     * @return 
+     */
+
+    public function deductPackagePoint($package_id){
+        $package = Package::find($package_id);
+        DB::table('users')->where('id', Auth::user()->id)->decrement('balance', $package->point);
+    }
+
+    /**
+     * Deduct package point from auth user to create new user.
+     *
+     * @param  int  $dealer_code
+     * @param  int  $reference_id // newly created user id
+     * 
+     */
+
+    public function payBonusByDealerCode($id, $reference_id, $package_id){
+        $package = Package::find($package_id);
+        $amount = ($package->point ) * 0.05 ;
+        $dealer  = User::find($id);
+        if($dealer->role == 'sub-dealer'){
+            $bonus = new Bonus;
+            $bonus->user_id = $dealer->id;
+            $bonus->user_balance = $dealer->bonus + $amount;
+            $bonus->amount = '5';
+            $bonus->type = 'sub-dealer';
+            $bonus->model =  '';
+            $bonus->reference_id = $reference_id;
+            $bonus = $bonus->save();
+            DB::table('users')->where('id', $dealer->id)->increment('bonus', $amount);
+        }
+        
+        $this->findDealerAndPay($dealer->dealer_id, $reference_id, $package_id);
+    }
+
+
+    /**
+     * Deduct package point from auth user to create new user.
+     *
+     * @param  int  $dealer_id
+     * @param  int  $reference_id // newly created user id
+     * 
+     */
+
+    public function findDealerAndPay($dealer_id, $reference_id,$package_id){
+        $package = Package::find($package_id);
+        $amount = ($package->point ) * 0.02 ;
+        $dealer  = $this->getUserBy(['dealer_id' => $dealer_id]);
+
+        $bonus = new Bonus;
+        $bonus->user_id = $dealer->id;
+        $bonus->user_balance = $dealer->bonus + $amount;
+        $bonus->amount = $amount;
+        $bonus->type = 'dealer';
+        $bonus->model =  '';
+        $bonus->reference_id = $reference_id;
+        $bonus = $bonus->save();
+        DB::table('users')->where('id', $dealer->id)->increment('bonus', $amount);
+    }
+
+     /**
+     * Display the specified resource.
+     *
+     * @param  int  $parent_id // parent user id
+     *   @param  int user_id //newly created user id
+     */
+
+    protected function payGenerationBonus($parent_id, $position, $user_id, $package_id){
+        $package = Package::find($package_id);
+        $amount = ($package->point ) / 100;
+        $ids = [];
+        $bonusData = [];
+        $i=0;
+        $break = 0;
+        
+        $carrylog = new Carrylog();
+        $carrylog->user_id = $parent_id;
+        $carrylog->carry = ($package->point ) / 10;
+        $carrylog->down_position = $position;
+        $carrylog->reference_id = $user_id;
+        $carrylog->save();
+
+        while($i<10 && $break != 1){
+            $parent = $this->getUserBy(['id' => $parent_id]);
+           
+            $parent_id =$parent->parent_id;
+            $position = $parent->position;
+
+            $ids[] = $parent->id;
+            if($parent->id == 1 || $parent->parent_id == 0){
+                $break = 1;
+            }
+            $bonusData[] = ['user_id' => $parent->parent_id, 'user_balance' => $parent->bonus + $amount, 'amount' => $amount, 'type' => 'Generation', 'reference_id' => $user_id];
+            
+            if($i < 9){
+                $carrylog = new Carrylog();
+                $carrylog->user_id = $parent_id;
+                $carrylog->carry = ($package->point ) / 10;
+                $carrylog->down_position = $position;
+                $carrylog->reference_id = $user_id;
+                $carrylog->save();
+            }
+            $i++;
+        }
+
+        DB::table('users')->whereIn('id', $ids)->increment('bonus', $amount);
+        DB::table('users')->whereIn('id', $ids)->increment( 'carry' , $package->point  / 10 );
+        DB::table('bonus')->insert($bonusData);
     }
 
     /**
@@ -227,6 +467,10 @@ class UserController extends Controller
 
     public function getUserBy($array = []){
         return User::where($array)->first();
+    }
+
+    public function generateDealerId($dealer_id){
+        return $dealer = $this->getUserBy(['dealer_id'=> $dealer_id]);
     }
 }
 

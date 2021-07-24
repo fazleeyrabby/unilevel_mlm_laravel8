@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends('layouts.admin')
 
 @section('title', 'Dashboard')
 
@@ -35,9 +35,9 @@
                     <table id="users_table" class="table table-striped mb-0">
                         <thead>
                             <tr>
-                                <th>#</th>
                                 <th>username</th>
                                 <th>Name</th>
+                                <th>Role</th>
                                 <th>Joining Date</th>
                                 <th>Downline</th>
                                 <th>Bonus</th>
@@ -49,21 +49,21 @@
                         <tbody>
                         @foreach($users as $user)
                             <tr>
-                                <th scope="row">1</th>
                                 <td>{{$user->username}}</td>
                                 <td>{{$user->name}}</td>
+                                <td> {{ $user->role }}{!! ($user->role == 'dealer') || ($user->role == 'sub-dealer') ? '  '. "<span class='badge badge-pill badge-success'>".$user->dealer_id ."</span>": '' !!}</td>
                                 <td>{{$user->created_at}}</td>
                                 <td>{{$user->total_sponsor}}</td>
-                                <td>{{$user->total_bonus}}</td>
+                                <td>{{$user->bonus}}</td>
                                 <td>{{$user->balance}}</td>
                                 <td>{{$user->carry}}</td>
                                 
                                 <td>
                                 <div class="button-items">
-                                    <a class="btn btn-info btn-sm" href="{{ url('admin/users/'.base64_encode($user->id).'/profile') }}" role="button">Profile</a>
-                                    <a class="btn btn-success btn-sm" href="#" role="button">Bonus</a>
-                                    <a class="btn btn-warning btn-sm" href="#" role="button">Wallet</a>
-                                    <a class="btn btn-danger btn-sm" href="#" role="button">Referral</a>
+                                    <a class="btn btn-info btn-sm" href="{{ url('admin/users/'.base64_encode($user->id * Auth::user()->id).'/profile') }}" role="button">Profile</a>
+                                    <a class="btn btn-success btn-sm" href="{{ url('admin/users/'.base64_encode($user->id * Auth::user()->id) .'/bonus') }}" role="button">Bonus</a>
+                                   
+                                    <a class="btn btn-warning btn-sm" href="{{ url('admin/users/'.base64_encode($user->id * Auth::user()->id).'/referral') }}" role="button">Referral</a>
                                     
                                 </div>
                                 </td>

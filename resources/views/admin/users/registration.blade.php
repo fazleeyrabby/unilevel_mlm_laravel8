@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends('layouts.admin')
 
 @section('title', 'User Details')
 
@@ -205,31 +205,28 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="new_password">new_password</label>
-                        <input id="new_password" type="text" class="form-control parsley-error" required placeholder="new_password" value="{{$user->sponsor_id}}">
+                        <label for="new_password">New Password</label>
+                        <input id="new_password" type="text" class="form-control parsley-error" required placeholder="New Password" value="{{$user->sponsor_id}}">
                         <ul class="parsley-errors-list filled">
                             <li class="parsley-required">This value is required.</li>
                         </ul>
                     </div>
 
                     <div class="form-group">
-                        <label for="confirm_password">confirm_password</label>
-                        <input id="confirm_password" type="text" class="form-control parsley-error" required placeholder="confirm_password" value="{{$user->dealer_code}}">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input id="confirm_password" type="text" class="form-control parsley-error" required placeholder="Confirm Password" value="{{$user->dealer_code}}">
                         <ul class="parsley-errors-list filled">
                             <li class="parsley-required">This value is required.</li>
                         </ul>
                     </div>
-
                     <div class="form-group m-b-0">
                         <div>
                             <button type="submit" class="btn btn-primary">
                                 Update
                             </button>
                         </div>
-                       
                     </div>
                 </form>
-
             </div>
         </div>
     </div> <!-- end col -->

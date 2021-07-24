@@ -18,6 +18,7 @@ class CreateUsersTable extends Migration
             $table->string('name',50);
             $table->string('email',50)->unique();
             $table->string('username',30)->unique();
+            $table->string('role',30)->nullable();
             $table->string('national_id',30)->nullable();
             $table->string('phone',30);
             $table->string('thana',30)->nullable();
@@ -38,7 +39,8 @@ class CreateUsersTable extends Migration
             $table->double('total_pv',11,2);
             $table->double('total_sponsor',11,2);
             $table->double('total_bonus',11,2);
-
+            $table->integer('downline')->nullable();
+            $table->date('downline_updated')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('transaction_password');

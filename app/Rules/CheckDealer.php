@@ -26,7 +26,7 @@ class CheckDealer implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $user  = User::where('dealer_code',$value)->first();
+        return $user  = User::where('dealer_id',$value)->first();
     }
 
     /**
