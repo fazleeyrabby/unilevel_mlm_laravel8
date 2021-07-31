@@ -86,7 +86,7 @@
                     <div class="form-group">
                         <label>Transaction password:</label>
                         <div>
-                            <input name="transaction_password" type="text" class="form-control @error('transaction_password') parsley-error @enderror"  required="" data-parsley-min="6" placeholder="Min value is 6" data-parsley-id="35">
+                            <input name="transaction_password" type="password" class="form-control @error('transaction_password') parsley-error @enderror"  required="" data-parsley-min="6" placeholder="Min value is 6" data-parsley-id="35">
                             <ul class="parsley-errors-list filled" id="parsley-id-35">
                             @error('transaction_password')
                                 <li class="parsley-required">{{$message}}</li>
@@ -97,7 +97,7 @@
                     <div class="form-group">
                         <label>Transaction confirm password:</label>
                         <div>
-                            <input name="confirm_transaction_password" type="text" class="form-control @error('confirm_transaction_password') parsley-error @enderror"  required="" data-parsley-max="6" placeholder="Max value is 6" data-parsley-id="37">
+                            <input name="confirm_transaction_password" type="password" class="form-control @error('confirm_transaction_password') parsley-error @enderror"  required="" data-parsley-max="6" placeholder="Max value is 6" data-parsley-id="37">
                             <ul class="parsley-errors-list filled" id="parsley-id-37">
                             @error('confirm_transaction_password')
                                 <li class="parsley-required">{{$message}}</li>

@@ -23,11 +23,10 @@
         <div class="card m-b-30">
             <div class="card-body">
 
-                <h4 class="mt-0 header-title">Striped rows</h4>
-                <p class="text-muted m-b-30 font-14">
-                    Use <code>.table-striped</code> to add zebra-striping to any table row
-                    within the <code>&lt;tbody&gt;</code>.
-                </p>
+                <h4 class="mt-0 header-title">All Funds</h4><br>
+                <!-- <p class="text-muted m-b-30 font-14">
+                  <code></code>
+                </p> -->
                 
                
 

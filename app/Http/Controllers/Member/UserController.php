@@ -30,7 +30,7 @@ class UserController extends Controller
      */
     public function profile($id)
     {   
-        
+        // return base64_decode($id);
         $id = base64_decode($id) /Auth::user()->id;
         $user = User::findOrFail($id);
         $parent = User::find($user->parent_id);
@@ -87,7 +87,7 @@ class UserController extends Controller
         ]);
 
         $user->name = $request->name;
-       
+        $user->email = $request->email;
         $user->phone = $request->phone;
         $user->thana = $request->thana;
         $user->district = $request->district;

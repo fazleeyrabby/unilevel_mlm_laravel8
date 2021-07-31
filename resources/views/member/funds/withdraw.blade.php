@@ -80,10 +80,10 @@ input[type=submit] {
         <div class="card m-b-30">
             <div class="card-body">
                 <h4 class="mt-0 header-title">Withdraw wallet balance</h4>
-                <p class="text-muted m-b-30 font-14">Parsley is a javascript form validation
+              <!--   <p class="text-muted m-b-30 font-14">Parsley is a javascript form validation
                     library. It helps you provide your users with feedback on their form
                     submission before sending it to your server.
-                </p>
+                </p> -->
                 <form action="" novalidate="" method="POST" autocomplete="on">
                     @csrf
                     
@@ -123,7 +123,7 @@ input[type=submit] {
                     <div class="form-group">
                         <label>Transaction password:</label>
                         <div>
-                            <input name="transaction_password" type="text" class="form-control @error('transaction_password') parsley-error @enderror"  required="" data-parsley-min="6" placeholder="Min value is 6" data-parsley-id="35">
+                            <input name="transaction_password" type="password" class="form-control @error('transaction_password') parsley-error @enderror"  required="" data-parsley-min="6" placeholder="Min value is 6" data-parsley-id="35">
                             <ul class="parsley-errors-list filled" id="parsley-id-35">
                             @error('transaction_password')
                                 <li class="parsley-required">{{$message}}</li>
@@ -134,7 +134,7 @@ input[type=submit] {
                     <div class="form-group">
                         <label>Transaction confirm password:</label>
                         <div>
-                            <input name="confirm_transaction_password" type="text" class="form-control @error('confirm_transaction_password') parsley-error @enderror"  required="" data-parsley-max="6" placeholder="Max value is 6" data-parsley-id="37">
+                            <input name="confirm_transaction_password" type="password" class="form-control @error('confirm_transaction_password') parsley-error @enderror"  required="" data-parsley-max="6" placeholder="Max value is 6" data-parsley-id="37">
                             <ul class="parsley-errors-list filled" id="parsley-id-37">
                             @error('confirm_transaction_password')
                                 <li class="parsley-required">{{$message}}</li>

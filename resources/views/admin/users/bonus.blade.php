@@ -26,8 +26,9 @@
 
                 <h4 class="mt-0 header-title">{{ $user->name}}</h4>
                 <p class="text-muted m-b-30 font-14">
-                    Use <code>.table-striped</code> to add zebra-striping to any table row
-                    within the <code>&lt;tbody&gt;</code>.
+                   <!--  Use <code>.table-striped</code> to add zebra-striping to any table row
+                    within the <code>&lt;tbody&gt;</code>. -->
+                    <code>Bonus</code>
                 </p>
                 
                
